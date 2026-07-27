@@ -1,0 +1,45 @@
+# Python bytecode and cache directories
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# Environment-variable files
+.env
+.env.local
+.env.*.local
+
+# Keep the example environment file in version control
+!.env.example
+
+# pytest cache and coverage output
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Type-checker and linter caches
+.mypy_cache/
+.ruff_cache/
+.pyre/
+
+# Build and package output
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# IDE and editor settings
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Operating-system files
+.DS_Store
+Thumbs.db
