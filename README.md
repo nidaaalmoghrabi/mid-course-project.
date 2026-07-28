@@ -1,6 +1,15 @@
 # Task Tracker API
 
-Task Tracker API is a small REST API learning project built with Python and FastAPI. This first module provides a structured FastAPI application and a health-check endpoint without authentication, database storage, or deployment infrastructure.
+Task Tracker API is a small REST API learning project built with Python and FastAPI. It provides task CRUD endpoints, a simple browser-based task board, due dates with overdue filtering, and an in-memory activity log without authentication, database storage, Docker, or cloud deployment.
+
+## Features
+
+- Create, list, read, update, and delete tasks.
+- Track task title, description, status, priority, assignee, and optional due date.
+- Filter tasks by status, priority, or overdue state.
+- Show due and overdue indicators on frontend task cards.
+- Record simple activity events for task create, update, status change, and delete.
+- View all activity or activity for a single task.
 
 ## Requirements
 
@@ -11,22 +20,28 @@ Task Tracker API is a small REST API learning project built with Python and Fast
 
 ```text
 task-tracker-api/
-│
-├── app/
-│   ├── __init__.py
-│   ├── main.py
-│   ├── models.py
-│   ├── repository.py
-│   └── routes.py
-│
-├── tests/
-│   ├── __init__.py
-│   └── test_health.py
-│
-├── .env.example
-├── .gitignore
-├── README.md
-└── requirements.txt
+|
+|-- app/
+|   |-- __init__.py
+|   |-- business_rules.py
+|   |-- main.py
+|   |-- models.py
+|   |-- repository.py
+|   |-- routes.py
+|   `-- storage.py
+|
+|-- frontend/
+|   `-- index.html
+|
+|-- tests/
+|   |-- __init__.py
+|   |-- conftest.py
+|   |-- test_health.py
+|   `-- test_tasks.py
+|
+|-- .env.example
+|-- README.md
+`-- requirements.txt
 ```
 
 ## Create a Virtual Environment
@@ -41,18 +56,18 @@ source venv/bin/activate
 ### Windows PowerShell
 
 ```powershell
-py -m venv venv
-.\venv\Scripts\Activate.ps1
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
 ```
 
 ### Windows Command Prompt
 
 ```cmd
-py -m venv venv
-venv\Scripts\activate.bat
+python -m venv .venv
+.venv\Scripts\activate.bat
 ```
 
-After activation, the terminal normally displays `(venv)` before the command prompt.
+After activation, the terminal normally displays the virtual environment name before the command prompt.
 
 ## Install Dependencies
 
@@ -96,10 +111,10 @@ APP_ENV=development
 Run the following command from the project root:
 
 ```bash
-uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
+python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
 ```
 
-The API will be available at:
+The API and task board frontend will be available at:
 
 ```text
 http://127.0.0.1:8000
@@ -115,6 +130,76 @@ The OpenAPI schema will be available at:
 
 ```text
 http://127.0.0.1:8000/openapi.json
+```
+
+## Task API
+
+Create a task:
+
+```bash
+curl -X POST http://127.0.0.1:8000/tasks \
+  -H "Content-Type: application/json" \
+  -d "{\"title\":\"Write README\",\"assignee\":\"Alicia\",\"due_date\":\"2026-08-03\"}"
+```
+
+List tasks:
+
+```bash
+curl http://127.0.0.1:8000/tasks
+```
+
+Filter overdue tasks:
+
+```bash
+curl "http://127.0.0.1:8000/tasks?overdue=true"
+```
+
+Update a task:
+
+```bash
+curl -X PATCH http://127.0.0.1:8000/tasks/TASK_ID \
+  -H "Content-Type: application/json" \
+  -d "{\"assignee\":\"Marcus\"}"
+```
+
+Delete a task:
+
+```bash
+curl -X DELETE http://127.0.0.1:8000/tasks/TASK_ID
+```
+
+## Activity API
+
+The activity log records task create, update, status-change, and delete events.
+
+View all activity:
+
+```bash
+curl http://127.0.0.1:8000/activity
+```
+
+View activity for one task:
+
+```bash
+curl http://127.0.0.1:8000/tasks/TASK_ID/activity
+```
+
+Activity update events only include fields that actually changed. For example, changing only the assignee records:
+
+```text
+updated assignee
+```
+
+Changing status records the previous and next status:
+
+```text
+changed status from ToDo to InProgress
+```
+
+Deleting a task records:
+
+```text
+deleted task
 ```
 
 ## Test the Health Endpoint with curl
@@ -138,30 +223,18 @@ Expected response:
 
 The exact timestamp will be different for every request.
 
-To include the response headers, run:
-
-```bash
-curl -i http://127.0.0.1:8000/health
-```
-
-The response should include:
-
-```text
-HTTP/1.1 200 OK
-```
-
 ## Run the Automated Tests
 
 From the project root, run:
 
 ```bash
-pytest
+python -m pytest
 ```
 
 For more detailed output, run:
 
 ```bash
-pytest -v
+python -m pytest -v
 ```
 
 ## Stop the Server

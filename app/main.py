@@ -11,7 +11,7 @@ from fastapi.responses import FileResponse
 
 from app import storage
 from app.business_rules import validate_status_transition
-from app.models import TaskCreate, TaskPriority, TaskResponse, TaskStatus, TaskUpdate
+from app.models import ActivityEntry, TaskCreate, TaskPriority, TaskResponse, TaskStatus, TaskUpdate
 from app.routes import router
 
 
@@ -55,6 +55,7 @@ def seed_demo_tasks() -> None:
             status=TaskStatus.TODO,
             priority=TaskPriority.HIGH,
             assignee="Alicia",
+            due_date="2026-07-24",
         ),
         TaskCreate(
             title="Implement onboarding flow",
@@ -62,6 +63,7 @@ def seed_demo_tasks() -> None:
             status=TaskStatus.IN_PROGRESS,
             priority=TaskPriority.MEDIUM,
             assignee="Marcus",
+            due_date="2026-07-30",
         ),
         TaskCreate(
             title="Ship bugfixes",
@@ -92,8 +94,9 @@ def serve_frontend() -> FileResponse:
 def list_tasks(
     status: TaskStatus | None = None,
     priority: TaskPriority | None = None,
+    overdue: bool | None = None,
 ) -> list[TaskResponse]:
-    return storage.get_all_tasks(status=status, priority=priority)
+    return storage.get_all_tasks(status=status, priority=priority, overdue=overdue)
 
 
 @app.post("/tasks", response_model=TaskResponse, status_code=status.HTTP_201_CREATED, tags=["tasks"])
@@ -107,6 +110,16 @@ def get_task(task_id: str) -> TaskResponse:
     if task is None:
         raise HTTPException(status_code=404, detail=f"Task with id {task_id} not found")
     return task
+
+
+@app.get("/activity", response_model=list[ActivityEntry], tags=["activity"])
+def list_activity() -> list[ActivityEntry]:
+    return storage.get_activity()
+
+
+@app.get("/tasks/{task_id}/activity", response_model=list[ActivityEntry], tags=["activity"])
+def list_task_activity(task_id: str) -> list[ActivityEntry]:
+    return storage.get_activity(task_id=task_id)
 
 
 @app.patch("/tasks/{task_id}", response_model=TaskResponse, tags=["tasks"])

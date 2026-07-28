@@ -1,0 +1,11 @@
+# Reflection
+
+I used AI assistant in my code editor to help plan, implement, test, and refine two features for the Task Tracker: due dates with overdue filtering and an activity log. AI helped me translate the project brief into scoped requirements, user stories, test ideas, and documentation. The editor assistant helped me inspect the existing files and draft focused changes to the FastAPI backend, pytest suite, and vanilla JavaScript frontend. I treated the generated output as a draft and checked the code, browser behavior, API responses, and tests before keeping it.
+
+One moment when AI helped was the planning of the activity feature. It identified the main events that should be recorded: task creation, normal updates, status changes, and deletion. It also helped separate a general activity endpoint from a task-specific endpoint. This gave me a useful starting structure without requiring a production database or user-account system.
+
+AI also slowed me down during update activity logging. The first approach treated submitted fields as changed fields. Because the frontend sends values that may be unchanged, the activity log produced misleading descriptions. For example, changing only the assignee could also report other fields. The output looked reasonable, but it did not match the actual user action. I had to inspect the behavior and revise the comparison logic.
+
+My review changed the final result by requiring activity events to compare the task before and after the update. The final event now records only actual differences, such as `updated assignee` or `updated due date`. I also corrected the overdue rule so that a task with a past due date is not considered overdue when its status is `Done`.
+
+The final test suite reports 30 passed tests. I also manually checked the modal, overdue pills, overdue filter, activity panel, task-specific activity, and deletion behavior. This project reinforced that AI can accelerate implementation, but evidence from tests and the running application is what establishes correctness.
